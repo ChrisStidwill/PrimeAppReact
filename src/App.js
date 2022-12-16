@@ -1,6 +1,5 @@
-import React from 'react';
+import React, {useState} from 'react';
 import ReactDOM from 'react-dom'
-import logo from './logo.svg';
 import deimos from './deimos.png';
 import earth from './earth.png';
 import red_dot from './red_dot.png'
@@ -14,18 +13,7 @@ export function App() {
   const app = (
     <div className="App">
     <header className="App-header">
-      {/* <script type="text/javascript" src="PrimeFunctions.js"></script> */}
-      <p>
-        Prime Number Calculator and Visualiser
-      </p>
-      {/* <a
-        className="App-link"
-        href="https://reactjs.org"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Learn React
-      </a> */}
+      <p>Prime Number Calculator and Visualiser</p>
     </header><br></br><br></br>
   </div>
   )
@@ -33,8 +21,11 @@ export function App() {
   return (app);
 }
 
+//Commented functions are where functionality is being implemented.
 export function PlanetsVisualisation(arg){
+  // const [bShouldShowEarth, setbShouldShowEarth] = useState(false)
   let bPrimePlanet = true;
+  const imageRef=React.useRef();
   if (!arg){
     console.log("Error: when calling up planet visualisation, no boolean value passed. Assuming boolean is true.");
   } else{
@@ -45,34 +36,38 @@ export function PlanetsVisualisation(arg){
     return (
     <div className="item">
       <img src={red_dot} id = "primePlanet" className="App-logo" alt="logo" />
-      <span className="Caption">Text below image 1</span>
+      <span className="Caption">Prime number as cubic km</span>
     </div>);
   } else{
+    //edit here
+    let bShouldShowEarth = true;
     return (
       <div className="item">
-        {/* <img src={deimos} id = "referencePlanet" className="Test-Class" alt="logo" /> */}
-        <img src={deimos} id = "referencePlanet" alt="logo" />
-        <span className="Caption">Text below image 2</span>
+        {bShouldShowEarth ? (
+          <img src={earth} id = "referencePlanet" ref={imageRef} className="App-logo" alt="logo" />
+        ) : (
+          <img src={deimos} id = "referencePlanet" ref={imageRef} className="App-logo" alt="logo" />
+        )}
+        {bShouldShowEarth ? (
+          <span className="Caption">Earth</span>
+        ) : (
+          <span className="Caption">Deimos, moon of Mars</span>
+        )}
       </div>
     );
   }
 }
 
-export function ReactLogo() {
-  const reactLogo = (
-    <div>
-      <p> This is instance {instance}</p>
-      <img src={logo} className="App-logo" alt="logo" />
-    </div>
-  )
-  instance++;
-  return (reactLogo);
-}
+// old return
+//<div className="item">
+//{/* <img src={deimos} id = "referencePlanet" className="Test-Class" alt="logo" /> */}
+//<img src={earth} id = "referencePlanet" ref={imageRef} className="App-logo" alt="logo" />
+//<span className="Caption">Earth</span>
+//</div>
 
 export function CurrentNumberDisplay(){
   const numDisplay = (
     <div>
-      <br></br>
       <table>
         <tr>
             <td><p id = "prevprevNum">2</p></td>
@@ -102,6 +97,7 @@ export function CurrentNumberDisplay(){
 }
 
 // Button functions & classes
+
 function checkButton(){
   var Num = Number(document.getElementById("EnteredNum").value);
   if (Num == NaN || Num <= 0){
@@ -152,7 +148,7 @@ function prevTwinButton(){
   updateDisplay(currentNum);
 }
 
-// Prime functions & classes
+// Prime functions
 
 function isPrime(numToCheck){
   // early return special cases
@@ -181,8 +177,6 @@ function isPrime(numToCheck){
   }
 }
 
-
-// This is probs broken.
 function getCurrentNum(){
   return Number(document.getElementById("currentNum").innerHTML);
 }
@@ -229,47 +223,60 @@ function visualisePrime(Num){
     var referencelength = 0;
     var primewidth = 0;
     var primelength = 0;
-    if (currentNum < 1000000000){
-        // case 2: reference planet greater. prime planet = 800px
-        referencewidth = 800;
-        referencelength = 800;
-        const scale = referencewidth/(2*1000000000);
-        let widlen = scale * Math.ceil(Math.pow((3/4)*currentNum*Math.PI,(1/3)));
-        primewidth = widlen;
-        primelength = widlen;
-    }
-    else{
-        // case 2: prime planet greater. prime planet = 800px
-        primewidth = 800;
-        primelength = 800;
-        const scale = primewidth/(2*1000000000);
-        let widlen = scale * Math.ceil(Math.pow((3/4)*currentNum*Math.PI,(1/3)));
-        referencewidth = widlen;
-        referencelength = widlen;
+    const defaultDimensions = 250;
+    //find radius of referenceplanet
+    var referencePlanetRadius;// where 1000 is the km^3 of deimos
+    let primePlanetRadius = (Math.pow((3/4)*currentNum/Math.PI,(1/3)));
+    if (currentNum < 100000){
+        // case 1: Deimos used as reference.
+        referencePlanetRadius = (Math.pow((3/4)*1000/Math.PI,(1/3)));
+        // referencePlanet.src.innerHTML = deimos;
+
+        if (currentNum < 1000){
+          //Deimos set to 250px
+          referencewidth = defaultDimensions;
+          referencelength = defaultDimensions;
+          const scale = primePlanetRadius/referencePlanetRadius; //scale such that 1000 km^3 represents 'defaultDimensions' pixels
+          let newDimensions = scale * defaultDimensions;
+          primewidth = newDimensions;
+          primelength = newDimensions;
+        } else{
+          // prime planet set to 250px
+          primewidth = defaultDimensions;
+          primelength = defaultDimensions;
+          const scale = referencePlanetRadius/primePlanetRadius; //scale such that 1000 km^3 represents 'defaultDimensions' pixels
+          let newDimensions = scale * defaultDimensions;
+          referencewidth = newDimensions;
+          referencelength = newDimensions;
+        }
+    } else{
+        // case 2: Earth used as reference.
+        referencePlanetRadius = (Math.pow((3/4)*1000000000000/Math.PI,(1/3)));
+        let bDisplayEarth = (currentNum < 100000)
+        // imageRef.current.src = bDisplayEarth === 'true' ? {earth} : {deimos};
+
+        if (currentNum < 1000000000000){
+          referencewidth = defaultDimensions;
+          referencelength = defaultDimensions;
+          const scale = primePlanetRadius/referencePlanetRadius; //scale such that 1000 km^3 represents 'defaultDimensions' pixels
+          let newDimensions = scale * defaultDimensions;
+          primewidth = newDimensions;
+          primelength = newDimensions;
+        }
+        else{
+          primewidth = defaultDimensions;
+          primelength = defaultDimensions;
+          const scale = referencePlanetRadius/primePlanetRadius; //scale such that 1000 km^3 represents 'defaultDimensions' pixels
+          let newDimensions = scale * defaultDimensions;
+          referencewidth = newDimensions;
+          referencelength = newDimensions;
+        }
     }
 
-    // earth is 1 trillion cubic km
-    // vol of a sphere is 4*pi/3 * r^3
-    // Earth's radius will be.. 400px
-    // given vol, to get radius you: r = (3/4pi vol)^(1/3)
-    // then scale radius down. So radius *= earth img radius (400) / earth actual radius
-    // Initially: big earth (800px?).
-    // while volume is less than half of earth, alter the red dot.
-    // while volume is less than 5x of earth, alter earth.
-    
-    // When setting, must be in the format specified below.
-    console.log(referencewidth);  
-    console.log(primewidth);
-    console.log(typeof(referencePlanet));
-    // referencePlanet.style.height = convertNumToPX(150);
-    // referencePlanet.style.width = convertNumToPX(4);
-    // referencePlanet.style.maxWidth = 10;
-    // referencePlanet.style.minWidth = 10;
-    
-    // referencePlanet.style.width = convertNumToPX(referencewidth);
-    // referencePlanet.style.height = convertNumToPX(referencelength);
-    // primePlanet.style.width = convertNumToPX(primewidth);
-    // primePlanet.style.height = convertNumToPX(primelength);
+    referencePlanet.style.width = convertNumToPX(referencewidth);
+    referencePlanet.style.height = convertNumToPX(referencelength);
+    primePlanet.style.width = convertNumToPX(primewidth);
+    primePlanet.style.height = convertNumToPX(primelength);
   }
 }
 
@@ -325,5 +332,5 @@ function findPrevTwin(Num){
 }
 
 function convertNumToPX(inNum){
-  return Number.toString(inNum) + "px";
+  return inNum + "px";
 }

@@ -2,7 +2,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import {App, ReactLogo, PlanetsVisualisation, CurrentNumberDisplay} from './App';
+import {App, PlanetsVisualisation, CurrentNumberDisplay} from './App';
 import reportWebVitals from './reportWebVitals';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
